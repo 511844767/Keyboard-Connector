@@ -12,6 +12,12 @@ f = 0   # f key
 q = 0   # quit
 c = 0   # combo
 
+'''
+combo_0 重击 + 闪避
+combo_1 重击 + 跳跃
+'''
+combo_n = 0
+
 # 屏幕中点坐标
 cx = win32api.GetSystemMetrics(win32con.SM_CXSCREEN) // 2
 cy = win32api.GetSystemMetrics(win32con.SM_CYSCREEN) // 2
@@ -70,16 +76,30 @@ def press_c():
     while True:
         semaphore_c.acquire()   # c press
         print("按下c")
-        mouse_click(0.01)
-        time.sleep(0.02)
-        mouse_click(0.3)
-        time.sleep(0.005)
-        win32api.keybd_event(32, MapVirtualKey(70, 0), 0, 0)
-        time.sleep(0.02)
-        win32api.keybd_event(32, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
-        time.sleep(0.5)
+        if combo_n == 1:    # 重击 + 跳跃
+            mouse_click(0.01)
+            time.sleep(0.02)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, cx, cy, 0, 0)
+            time.sleep(0.1)
+            win32api.keybd_event(32, MapVirtualKey(70, 0), 0, 0)
+            win32api.keybd_event(32, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
+            time.sleep(0.2)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, cx, cy, 0, 0)
+            time.sleep(0.2)
+        elif combo_n == 0: # 重击 + 闪避
+            mouse_click(0.01)
+            time.sleep(0.02)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, cx, cy, 0, 0)
+            time.sleep(0.3)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, cx, cy, 0, 0)
+            win32api.keybd_event(83, MapVirtualKey(70, 0), 0, 0)
+            win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN | win32con.MOUSEEVENTF_RIGHTUP, cx, cy, 0, 0)
+            time.sleep(0.3)
+            win32api.keybd_event(83, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(87, MapVirtualKey(70, 0), 0, 0)
+            time.sleep(0.05)
+            win32api.keybd_event(87, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
         c = 0
-        
 
 
 # 运行进程
