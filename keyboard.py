@@ -15,8 +15,9 @@ c = 0   # combo
 '''
 combo_0 重击 + 闪避
 combo_1 重击 + 跳跃
+combo_2 AAZ + 闪避
 '''
-combo_n = 0
+combo_n = 2
 
 # 屏幕中点坐标
 cx = win32api.GetSystemMetrics(win32con.SM_CXSCREEN) // 2
@@ -24,6 +25,9 @@ cy = win32api.GetSystemMetrics(win32con.SM_CYSCREEN) // 2
 
 # 信号量
 semaphore_c = threading.Semaphore(0)    # combo
+
+# 闪避计数
+dodge_counter = 0
 
 def on_pressq(key):
     #监听按键q
@@ -49,9 +53,9 @@ def on_pressc(key):
     #监听按键c
     if str(key)=="'"+'r'+"'":   # c键开始combo
         if(c == 0):
-            semaphore_c.release()
             c = 1
-            time.sleep(0.5)
+            semaphore_c.release()
+            time.sleep(0.8)
 
 def press_f():
     global f, q
@@ -71,7 +75,7 @@ def press_c():
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, cx, cy, 0, 0)
         time.sleep(period)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, cx, cy, 0, 0)
-    global c, q
+    global c, q, dodge_counter
     MapVirtualKey = ctypes.windll.user32.MapVirtualKeyA
     while True:
         semaphore_c.acquire()   # c press
@@ -87,18 +91,52 @@ def press_c():
             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, cx, cy, 0, 0)
             time.sleep(0.2)
         elif combo_n == 0: # 重击 + 闪避
-            mouse_click(0.01)
-            time.sleep(0.02)
-            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, cx, cy, 0, 0)
-            time.sleep(0.3)
-            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, cx, cy, 0, 0)
-            win32api.keybd_event(83, MapVirtualKey(70, 0), 0, 0)
-            win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN | win32con.MOUSEEVENTF_RIGHTUP, cx, cy, 0, 0)
-            time.sleep(0.3)
-            win32api.keybd_event(83, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
-            win32api.keybd_event(87, MapVirtualKey(70, 0), 0, 0)
-            time.sleep(0.05)
-            win32api.keybd_event(87, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
+            dodge_counter += 1
+            if dodge_counter < 3: # 两次闪避后进入内置CD
+                mouse_click(0.01)
+                time.sleep(0.02)
+                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, cx, cy, 0, 0)
+                time.sleep(0.41)
+                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, cx, cy, 0, 0)
+                win32api.keybd_event(83, MapVirtualKey(70, 0), 0, 0)
+                win32api.keybd_event(16, MapVirtualKey(70, 0), 0, 0)
+                time.sleep(0.075)
+                win32api.keybd_event(16, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
+                time.sleep(0.2)
+                win32api.keybd_event(83, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
+                win32api.keybd_event(87, MapVirtualKey(70, 0), 0, 0)
+                time.sleep(0.05)
+                win32api.keybd_event(87, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
+                time.sleep(0.05)
+            else:               # 第三次无法闪避，用跳跃代替
+                mouse_click(0.01)
+                time.sleep(0.02)
+                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, cx, cy, 0, 0)
+                time.sleep(0.41)
+                win32api.keybd_event(32, MapVirtualKey(70, 0), 0, 0)
+                win32api.keybd_event(32, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
+                time.sleep(0.2)
+                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, cx, cy, 0, 0)
+                time.sleep(0.3)
+                dodge_counter = 0
+        elif combo_n == 2: # AAZ + 闪避
+                mouse_click(0.02)
+                time.sleep(0.23)
+                mouse_click(0.02)
+                time.sleep(0.02)
+                mouse_click(0.27)
+                time.sleep(0.02)
+                win32api.keybd_event(16, MapVirtualKey(70, 0), 0, 0)    # shift
+                time.sleep(0.02)
+                win32api.keybd_event(16, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
+                win32api.keybd_event(83, MapVirtualKey(70, 0), 0, 0)    # s
+                time.sleep(0.02)
+                win32api.keybd_event(83, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
+                time.sleep(0.02)
+                win32api.keybd_event(87, MapVirtualKey(70, 0), 0, 0)    # w
+                time.sleep(0.02)
+                win32api.keybd_event(87, MapVirtualKey(70, 0), win32con.KEYEVENTF_KEYUP, 0)
+                time.sleep(0.145)
         c = 0
 
 
